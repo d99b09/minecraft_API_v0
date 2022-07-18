@@ -1,16 +1,21 @@
+import json
 import os
 
 from pynput.mouse import Button, Controller
 from pynput.keyboard import Controller as Controller2
 from pynput.keyboard import Key
 import asyncio
-
+import serial
 import time
 from threading import Thread
 
-class Minecraft_API_mio(Thread):
+
+ROTATION_SPEED_INCREASE = 50
+XY_LIMIT = 3
+
+
+class Minecraft_API_mio():
     def __init__(self):
-        super().__init__()
         self.mouse = Controller()
         self.keyboard = Controller2()
         self.start_time = time.time()
@@ -25,18 +30,24 @@ class Minecraft_API_mio(Thread):
         self.button_keyboard_headers = {'w': 'w', 'a': 'a', 's': 's', 'd': 'd', 'e': 'e', 'shift': Key.shift,
                                         'ctrl': Key.ctrl, 'space': Key.space}
         self.button_mouse_headers = {'lCkick': Button.left, 'rClick': Button.right}
+        self.ser = serial.Serial()
+        self.ser.port = '/dev/cu.usbserial-0001'
+        self.ser.baudrate = 115200
+        self.ser.timeout = 2
+        self.ser.open()
+        self.json_data = {'x': 0, 'y': 0, 's': 0}
 
     def minecraft_launcher_launch(self):
         os.system("open /Users/dima/Downloads/TLauncher-2.86/TLauncher-2.86.jar")#mac os
 
 
-    def run(self) -> None:
+    async def run(self) -> None:
         while not self.is_done:
-            # print(self.x_speed, self.y_speed)
+            print(self.x_speed, self.y_speed)
             self.mouse.move(self.x_speed, self.y_speed)
             self.keyboard_button_check_click()
-            time.sleep(self.duration)
-            #time.sleep(0.1)
+            await asyncio.sleep(self.duration)
+            # await asyncio.sleep(1)
 
     def stop(self):
         self.is_done = True
@@ -82,44 +93,93 @@ class Minecraft_API_mio(Thread):
     def release_button(self, button):
         self.button_states[button] = False
 
+    async def get_data(self):
+        line = self.ser.readline()
+        await asyncio.sleep(3)
+
+        while 1:
+            line = self.ser.readline()
+            print(line)
+            s_list = line.decode().split(',')[:-1]
+            i_list = []
+            for i in s_list:
+                try:
+                    i_list.append(int(i))
+                except:
+                    pass
+            if i_list[0]:
+                x = -i_list[1]
+            else:
+                x = i_list[1]
+
+            if i_list[2]:
+                y = -i_list[3]
+            else:
+                y = i_list[3]
+            self.json_data = {'y': x, 'x': y, 's': i_list[4]}
+            print(self.json_data)
+            await asyncio.sleep(0.05)
+
+    async def controller(self):
+        while True:
+            if self.json_data['s']:
+                self.rotationbyspeed(self.json_data['x'] * ROTATION_SPEED_INCREASE,
+                                     self.json_data['y'] * ROTATION_SPEED_INCREASE)
+            else:
+                if self.json_data['x'] > XY_LIMIT:
+                    self.release_button('a')
+                    self.press_button('d')
+                elif self.json_data['x'] < -XY_LIMIT:
+                    self.release_button('d')
+                    self.press_button('a')
+                else:
+                    self.release_button('d')
+                    self.release_button('a')
+                if self.json_data['y'] > XY_LIMIT:
+                    self.release_button('s')
+                    self.press_button('w')
+                elif self.json_data['y'] < -XY_LIMIT:
+                    self.release_button('w')
+                    self.press_button('s')
+                else:
+                    self.release_button('w')
+                    self.release_button('s')
+
+            await asyncio.sleep(0.05)
+
+    async def control_loop(self):
+        await asyncio.gather(
+            self.run(),
+            self.get_data(),
+            self.controller()
+        )
 
 
 
 
+mapi = Minecraft_API_mio()
 
-def main():
-    mapi = Minecraft_API_mio()
-    mapi.minecraft_launcher_launch()
-    return 0
-    # mapi.button_click()
-    mapi.start()
-    time.sleep(3)
-    mapi.press_button('w')
-    # mapi.button_states['w'] = True
-    # print(mapi.button_states)
-    # print(mapi.pre_button_states)
+async def controller():
+    while 1:
+        await asyncio.sleep(3)
+        mapi.rotationbyspeed(100, 100)
+        await asyncio.sleep(3)
 
-    #mapi.rotationbyspeed(100, 100)
-    # time.sleep(5)
-    # print(mapi.pre_button_states)
-    # mapi.button_states['w'] = False
-    # print(mapi.button_states)w
-    # print(mapi.pre_button_states)
-    time.sleep(5)
-    mapi.release_button('w')
-    print(mapi.pre_button_states)
-    print(mapi.button_states)
-    time.sleep(1)
+        mapi.rotationbyspeed(300, 300)
+        await asyncio.sleep(3)
+        mapi.release_button('w')
+        mapi.release_button('w')
 
-    # mapi.button_states['w'] = True
-    # time.sleep(5)
-    mapi.button_states['w'] = False
 
-    mapi.stop()
-
+async def main():
+   await asyncio.gather(
+       # controller(),
+       mapi.run()
+   )
 
 
 if __name__ == '__main__':
-    main()
-
+    mapi = Minecraft_API_mio()
+    asyncio.run(mapi.control_loop())
+    # mapi.minecraft_launcher_launch()
 
