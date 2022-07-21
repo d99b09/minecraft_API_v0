@@ -1,4 +1,3 @@
-import json
 import os
 
 from pynput.mouse import Button, Controller
