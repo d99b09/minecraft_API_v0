@@ -1,20 +1,23 @@
 import os
-
+import argparse
 from pynput.mouse import Button, Controller
 from pynput.keyboard import Controller as Controller2
 from pynput.keyboard import Key
 import asyncio
 import serial
 import time
-from threading import Thread
+
 
 
 ROTATION_SPEED_INCREASE = 50
 XY_LIMIT = 3
 
+parser = argparse.ArgumentParser(description='A tutorial of argparse!')
+parser.add_argument("--a")
 
 class Minecraft_API_mio():
-    def __init__(self):
+    def __init__(self, mode):
+        self.mode = mode
         self.mouse = Controller()
         self.keyboard = Controller2()
         self.start_time = time.time()
@@ -29,11 +32,11 @@ class Minecraft_API_mio():
         self.button_keyboard_headers = {'w': 'w', 'a': 'a', 's': 's', 'd': 'd', 'e': 'e', 'shift': Key.shift,
                                         'ctrl': Key.ctrl, 'space': Key.space}
         self.button_mouse_headers = {'lCkick': Button.left, 'rClick': Button.right}
-        self.ser = serial.Serial()
-        self.ser.port = '/dev/cu.usbserial-0001'
-        self.ser.baudrate = 115200
-        self.ser.timeout = 2
-        self.ser.open()
+        # self.ser = serial.Serial()
+        # self.ser.port = '/dev/cu.usbserial-0001'
+        # self.ser.baudrate = 115200
+        # self.ser.timeout = 2
+        # self.ser.open()
         self.json_data = {'x': 0, 'y': 0, 's': 0}
 
     def minecraft_launcher_launch(self):
@@ -119,8 +122,8 @@ class Minecraft_API_mio():
             print(self.json_data)
             await asyncio.sleep(0.05)
 
-    async def controller(self):
-        while True:
+    async def controller_mine(self):
+        while self.mode == 'mine':
             if self.json_data['s']:
                 self.rotationbyspeed(self.json_data['x'] * ROTATION_SPEED_INCREASE,
                                      self.json_data['y'] * ROTATION_SPEED_INCREASE)
@@ -146,17 +149,27 @@ class Minecraft_API_mio():
 
             await asyncio.sleep(0.05)
 
+    async def controller_mouse(self):
+        while self.mode == 'mouse':
+            self.rotationbyspeed(self.json_data['x'] * ROTATION_SPEED_INCREASE,
+                                 self.json_data['y'] * ROTATION_SPEED_INCREASE)
+            if self.json_data['s']:
+                self.mouse.press(Button.left)
+                self.mouse.release(Button.left)
+
+
     async def control_loop(self):
+
         await asyncio.gather(
             self.run(),
-            self.get_data(),
-            self.controller()
+            # self.get_data(),
+            controller()
         )
 
 
 
 
-mapi = Minecraft_API_mio()
+# mapi = Minecraft_API_mio()
 
 async def controller():
     while 1:
@@ -178,7 +191,9 @@ async def main():
 
 
 if __name__ == '__main__':
-    mapi = Minecraft_API_mio()
-    asyncio.run(mapi.control_loop())
+    args = parser.parse_args()
+    a = args.a
+    mapi = Minecraft_API_mio(a)
+    # asyncio.run(mapi.control_loop())
     # mapi.minecraft_launcher_launch()
 
