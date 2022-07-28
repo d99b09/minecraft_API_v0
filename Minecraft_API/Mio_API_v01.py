@@ -22,7 +22,7 @@ class Minecraft_API_mio():
         self.keyboard = Controller2()
         self.start_time = time.time()
         self.x_speed, self.y_speed = 0, 0
-        self.duration = 0.001
+        self.duration = 1
         self.is_done = False
         self.pre_button_states = {'w': False, 'a': False, 's': False, 'd': False, 'e': False, 'shift': False,
                               'ctrl': False, 'space': False, 'lCkick': False, 'rClick': False}
@@ -32,11 +32,11 @@ class Minecraft_API_mio():
         self.button_keyboard_headers = {'w': 'w', 'a': 'a', 's': 's', 'd': 'd', 'e': 'e', 'shift': Key.shift,
                                         'ctrl': Key.ctrl, 'space': Key.space}
         self.button_mouse_headers = {'lCkick': Button.left, 'rClick': Button.right}
-        # self.ser = serial.Serial()
-        # self.ser.port = '/dev/cu.usbserial-0001'
-        # self.ser.baudrate = 115200
-        # self.ser.timeout = 2
-        # self.ser.open()
+        self.ser = serial.Serial()
+        self.ser.port = '/dev/cu.usbserial-0001'
+        self.ser.baudrate = 115200
+        self.ser.timeout = 2
+        self.ser.open()
         self.json_data = {'x': 0, 'y': 0, 's': 0}
         self.json_data_band1 = {'x': 0, 'y': 0, 's': 0}
         self.json_data_band2 = {'x': 0, 'y': 0, 's': 0}
@@ -58,7 +58,7 @@ class Minecraft_API_mio():
         self.is_done = True
 
     def rotationbyspeed(self, x, y):
-        print('rotation')
+        # print('rotation')
         if x != 0 and y != 0:
             min_speed = min(abs(x), abs(y))
         elif x != 0:
@@ -122,6 +122,9 @@ class Minecraft_API_mio():
                     i_list.append(int(i))
                 except:
                     pass
+            if len(i_list) == 0:
+                await asyncio.sleep(1)
+                continue
             if i_list[0]:
                 x = -i_list[1]
             else:
@@ -131,7 +134,7 @@ class Minecraft_API_mio():
                 y = -i_list[3]
             else:
                 y = i_list[3]
-            self.json_data = {'y': x, 'x': y, 's': i_list[4]}
+            self.json_data = {'y': x, 'x': y, 's': 0}#i_list[4]}
             print(self.json_data)
             await asyncio.sleep(0.05)
 
@@ -165,7 +168,7 @@ class Minecraft_API_mio():
             await asyncio.sleep(0.05)
 
     async def controller_minecraft_one_band_v1(self):
-        while self.mode == 'mine':
+        while True:#self.mode == 'mine':
             if self.json_data['s']:
                 self.rotationbyspeed(self.json_data['x'] * ROTATION_SPEED_INCREASE,
                                      self.json_data['y'] * ROTATION_SPEED_INCREASE)
@@ -240,23 +243,23 @@ class Minecraft_API_mio():
             await asyncio.sleep(0.01)
 
     async def controller_mouse(self):
-        while self.mode == 'mouse':
+        while True: #self.mode == 'mouse':
             self.rotationbyspeed(self.json_data['x'] * ROTATION_SPEED_INCREASE,
                                  self.json_data['y'] * ROTATION_SPEED_INCREASE)
             if self.json_data['s']:
                 self.mouse.press(Button.left)
                 self.mouse.release(Button.left)
+            await asyncio.sleep(0.01)
 
 
     async def control_loop(self):
 
         await asyncio.gather(
             self.run(),
-            # self.get_data_one_band(),
-            self.get_test_data(),
-            # self.controller_minecraft_one_band_v1(),
+            self.get_data_one_band(),
+            # self.get_test_data(),
+            self.controller_minecraft_one_band_v1(),
             # self.controller_minecraft_one_band_v2(),
-
             # self.controller_mouse(),
 
         )
