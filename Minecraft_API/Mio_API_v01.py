@@ -100,13 +100,32 @@ class Minecraft_API_mio():
 
     async def get_test_data(self):
         while True:
+            line = self.ser.readline()
+            # print(line)
             await asyncio.sleep(3)
-            self.rotationbyspeed(100, 100)
-            await asyncio.sleep(3)
-            self.rotationbyspeed(300, 300)
-            await asyncio.sleep(3)
-            self.rotationbyspeed(0, 0)
-            await asyncio.sleep(3)
+            line1 = 0
+            line2 = 0
+            while 1:
+                line = self.ser.readline()
+                # print(line)
+                s_list = line.decode().split(',')[:-1]
+                i_list = []
+
+                for i in s_list:
+                    try:
+                        i_list.append(int(i))
+                    except:
+                        pass
+                if len(i_list) == 0:
+                    await asyncio.sleep(1)
+                    continue
+
+                if i_list[-1] == 1:
+                    line1 = line
+                else:
+                    line2 = line
+                print(line1, '                 ', line2)
+                await asyncio.sleep(0.1)
 
     async def get_data_one_band(self):
         line = self.ser.readline()
@@ -162,9 +181,11 @@ class Minecraft_API_mio():
             else:
                 y = i_list[3]
             if i_list[5] == 1:#???
-                self.json_data_band1 = {'y': x, 'x': y, 's': i_list[4]}
+                self.json_data_band1 = {'x': x, 'y': y, 's': i_list[4]}
             if i_list[5] == 2:
-                self.json_data_band2 = {'y': x, 'x': y, 's': i_list[4]}
+                self.json_data_band2 = {'x': x, 'y': y, 's': i_list[4]}
+            print(self.json_data_band1, '                 ', self.json_data_band2)
+
             await asyncio.sleep(0.05)
 
     async def controller_minecraft_one_band_v1(self):
@@ -251,17 +272,24 @@ class Minecraft_API_mio():
                 self.mouse.release(Button.left)
             await asyncio.sleep(0.01)
 
+    async def upload_code(self):
+        while True:
+            a = input()
+            print(type(a))
+            print(a)
 
     async def control_loop(self):
 
         await asyncio.gather(
-            self.run(),
-            self.get_data_one_band(),
+            # self.run(),
+            # self.get_data_one_band(),
+            self.get_data_two_band(),
+
             # self.get_test_data(),
-            self.controller_minecraft_one_band_v1(),
+            # self.controller_minecraft_one_band_v1(),
             # self.controller_minecraft_one_band_v2(),
             # self.controller_mouse(),
-
+            # self.upload_code()
         )
 
 
