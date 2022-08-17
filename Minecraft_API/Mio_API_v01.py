@@ -153,7 +153,7 @@ class Minecraft_API_mio():
                 y = -i_list[3]
             else:
                 y = i_list[3]
-            self.json_data = {'y': x, 'x': y, 's': 0}#i_list[4]}
+            self.json_data = {'y': x, 'x': y, 's': i_list[4]}
             print(self.json_data)
             await asyncio.sleep(0.05)
 
@@ -163,7 +163,7 @@ class Minecraft_API_mio():
 
         while 1:
             line = self.ser.readline()
-            print(line)
+            # print(line)
             s_list = line.decode().split(',')[:-1]
             i_list = []
             for i in s_list:
@@ -180,9 +180,9 @@ class Minecraft_API_mio():
                 y = -i_list[3]
             else:
                 y = i_list[3]
-            if i_list[5] == 1:#???
+            if i_list[4] == 1:#???
                 self.json_data_band1 = {'x': x, 'y': y, 's': i_list[4]}
-            if i_list[5] == 2:
+            if i_list[4] == 2:
                 self.json_data_band2 = {'x': x, 'y': y, 's': i_list[4]}
             print(self.json_data_band1, '                 ', self.json_data_band2)
 
@@ -282,8 +282,8 @@ class Minecraft_API_mio():
 
         await asyncio.gather(
             # self.run(),
-            # self.get_data_one_band(),
-            self.get_data_two_band(),
+            self.get_data_one_band(),
+            # self.get_data_two_band(),
 
             # self.get_test_data(),
             # self.controller_minecraft_one_band_v1(),
