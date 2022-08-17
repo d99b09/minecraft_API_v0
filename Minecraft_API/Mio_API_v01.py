@@ -43,6 +43,8 @@ class Minecraft_API_mio():
         self.json_data_band2 = {'x': 0, 'y': 0, 's': 0}
 
 
+
+
     def minecraft_launcher_launch(self):
         os.system("open /Users/dima/Downloads/TLauncher-2.86/TLauncher-2.86.jar")#mac os
 
