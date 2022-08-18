@@ -36,7 +36,7 @@ class Minecraft_API_mio():
         self.ser.port = '/dev/cu.usbserial-0001'
         self.ser.baudrate = 115200
         self.ser.timeout = 2
-        self.ser.open()
+        # self.ser.open()
         self.json_data = {'x': 0, 'y': 0, 's': 0}
         self.json_data_band1 = {'x': 0, 'y': 0, 's': 0}
         self.json_data_band2 = {'x': 0, 'y': 0, 's': 0}
@@ -281,8 +281,8 @@ class Minecraft_API_mio():
     async def control_loop(self):
 
         await asyncio.gather(
-            # self.run(),
-            self.get_data_one_band(),
+            self.run(),
+            #self.get_data_one_band(),
             # self.get_data_two_band(),
 
             # self.get_test_data(),

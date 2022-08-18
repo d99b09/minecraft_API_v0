@@ -1,0 +1,47 @@
+{
+  "common_settings": {
+    "armband_modes": [
+      "mouse",
+      "hotkeys"
+    ],
+    "available_bindings": [
+      "w",
+      "a",
+      "s",
+      "d",
+      "e",
+      "space",
+      "shift",
+      "left_click",
+      "right_click",
+      "mousewheel_up",
+      "mousewheel_down"
+    ]
+  },
+  "armbands": [
+    {
+      "id": "1",
+      "enabled": true,
+      "arm": "left",
+      "mode": "hotkeys",
+      "bindings": {
+        "tilt_forward": "w",
+        "tilt_backward": "s",
+        "tilt_left": "a",
+        "tilt_right": "d",
+        "gesture_1": "space",
+        "gesture_2": "shift"
+      }
+    },
+    {
+      "id": "2",
+      "enabled": true,
+      "arm": "right",
+      "mode": "mouse",
+      "bindings": {
+        "gesture_1": "left_click",
+        "gesture_2": "right_click"
+      }
+    }
+  ]
+}
