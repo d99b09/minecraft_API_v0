@@ -6,7 +6,7 @@ from pynput.keyboard import Key
 import asyncio
 import serial
 import time
-
+import json
 
 
 ROTATION_SPEED_INCREASE = 50
@@ -40,6 +40,11 @@ class Minecraft_API_mio():
         self.json_data = {'x': 0, 'y': 0, 's': 0}
         self.json_data_band1 = {'x': 0, 'y': 0, 's': 0}
         self.json_data_band2 = {'x': 0, 'y': 0, 's': 0}
+
+    def json_init(self):
+        with open('config.json', mode='r') as f:
+            self.json_config = json.load(f)
+
 
 
     def minecraft_launcher_launch(self):
@@ -126,6 +131,8 @@ class Minecraft_API_mio():
                     line2 = line
                 print(line1, '                 ', line2)
                 await asyncio.sleep(0.1)
+
+
 
     async def get_data_one_band(self):
         line = self.ser.readline()
@@ -298,6 +305,7 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # a = args.a
     mapi = Minecraft_API_mio()
-    asyncio.run(mapi.control_loop())
+    mapi.json_init()
+    # asyncio.run(mapi.control_loop())
     # mapi.minecraft_launcher_launch()
 
