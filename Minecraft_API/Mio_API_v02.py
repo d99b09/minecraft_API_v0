@@ -16,7 +16,7 @@ XY_LIMIT = 3
 class Mio_API(QRunnable):
     def __init__(self, mode=0):
         super().__init__()
-        self.sleep_time = 0.05
+        self.sleep_time = 0
         self.config_changed = False
         self.stop_requested = False
         self.mode = mode
@@ -60,7 +60,6 @@ class Mio_API(QRunnable):
                 line = self.ser.readline()
                 self.is_open = True
                 # print(self.is_open)
-
                 break
             except:
                 self.is_open = False
@@ -68,7 +67,7 @@ class Mio_API(QRunnable):
 
     async def mouse_run(self) -> None:
         while not self.is_done:
-            print(self.x_speed, self.y_speed)
+            # print(self.x_speed, self.y_speed)
             self.mouse.move(self.x_speed, self.y_speed)
             self.keyboard_button_check_click()
             await asyncio.sleep(self.duration)
@@ -91,7 +90,7 @@ class Mio_API(QRunnable):
         self.y_speed = y/min_speed
         self.duration = 1/min_speed
 
-    def keyboard_button_check_click(self):
+    def keyboard_button_check_click(self):#TODO redesign
 
         if self.pre_button_states != self.button_states:
             print(self.pre_button_states)
@@ -117,6 +116,10 @@ class Mio_API(QRunnable):
     def release_button(self, button):
         self.button_states[button] = False
 
+    def press_gesture_mouse_button(self, button):
+        self.mouse.press(self.button_mouse_headers[button])
+        self.mouse.release(self.button_mouse_headers[button])
+
     def init_json(self):
         with open('config.json', mode='r') as f:
             self.json_config = json.load(f)
@@ -133,7 +136,7 @@ class Mio_API(QRunnable):
 
     async def get_data_with_config(self):
         while True:
-            print(self.is_open)
+            # print(self.is_open)
             while self.is_open:
                 print('Data:')
                 line = self.ser.readline()
@@ -158,7 +161,8 @@ class Mio_API(QRunnable):
 
                     s = i_list[4]
                     band_id = str(i_list[5])
-                    self.json_data_with_config[band_id] = {'x': x, 'y': y, 's': s}
+                    self.json_data_with_config[band_id] = {'x': -y, 'y': x, 's': s}
+                    # print(self.json_data_with_config)
                 except:
                     pass
                 await asyncio.sleep(self.sleep_time)
@@ -179,7 +183,7 @@ class Mio_API(QRunnable):
                 else:
                     self.release_button(self.my_json_config[self.right_id]["bindings"]["gesture_1"])
 
-            elif self.my_json_config[self.right_id]["mode"] == "hotkey":
+            elif self.my_json_config[self.right_id]["mode"] == "hotkeys":
                 if msg_l0['x'] > XY_LIMIT:
                     self.release_button(self.my_json_config[self.right_id]["bindings"]["tilt_left"])
                     self.press_button(self.my_json_config[self.right_id]["bindings"]["tilt_right"])
@@ -199,23 +203,27 @@ class Mio_API(QRunnable):
                     self.release_button(self.my_json_config[self.right_id]["bindings"]["tilt_forward"])
                     self.release_button(self.my_json_config[self.right_id]["bindings"]["tilt_backward"])
                 if msg_l0['s'] == 1:
-                    self.press_button(self.my_json_config[self.right_id]["bindings"]["gesture_1"])
+                    self.press_gesture_mouse_button(self.my_json_config[self.right_id]["bindings"]["gesture_1"])
                 else:
                     self.release_button(self.my_json_config[self.right_id]["bindings"]["gesture_1"])
             await asyncio.sleep(self.sleep_time)
 
     async def controller_left_band_with_config(self):
         while self.my_json_config[self.left_id]["enabled"]:
+            print(self.my_json_config[self.left_id]["mode"])
             msg_l0 = self.json_data_with_config[self.left_id]
             if self.my_json_config[self.left_id]["mode"] == "mouse":
                 self.rotationbyspeed(msg_l0['x'] * ROTATION_SPEED_INCREASE, msg_l0['y'] * ROTATION_SPEED_INCREASE)
                 if msg_l0['s'] == 1:
-                    self.press_button(self.my_json_config[self.left_id]["bindings"]["gesture_1"])
+                    self.press_gesture_mouse_button(self.my_json_config[self.left_id]["bindings"]["gesture_1"])
                 else:
                     self.release_button(self.my_json_config[self.left_id]["bindings"]["gesture_1"])
 
-            elif self.my_json_config[self.left_id]["mode"] == "hotkey":
+            elif self.my_json_config[self.left_id]["mode"] == "hotkeys":
+                print(msg_l0)
+                print(msg_l0['x'])
                 if msg_l0['x'] > XY_LIMIT:
+                    print(1111111)
                     self.release_button(self.my_json_config[self.left_id]["bindings"]["tilt_left"])
                     self.press_button(self.my_json_config[self.left_id]["bindings"]["tilt_right"])
                 elif msg_l0['x'] < -XY_LIMIT:
@@ -265,7 +273,7 @@ class Mio_API(QRunnable):
             self.check_config(),
             self.check_button_now(),
             self.get_data_with_config(),
-            self.controller_left_band_with_config(),
+            # self.controller_left_band_with_config(),
             self.controller_right_band_with_config(),
             self.open_serial()
 

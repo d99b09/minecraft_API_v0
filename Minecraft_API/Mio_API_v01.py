@@ -125,7 +125,7 @@ class Minecraft_API_mio():
                 else:
                     line2 = line
                 print(line1, '                 ', line2)
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0)
 
     async def get_data_one_band(self):
         line = self.ser.readline()
