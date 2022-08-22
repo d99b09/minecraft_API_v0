@@ -20,7 +20,7 @@
   },
   "armbands": [
     {
-      "id": "1",
+      "id": "2",
       "enabled": true,
       "arm": "left",
       "mode": "hotkeys",
@@ -34,7 +34,7 @@
       }
     },
     {
-      "id": "2",
+      "id": "3",
       "enabled": true,
       "arm": "right",
       "mode": "mouse",

@@ -130,7 +130,7 @@ class Minecraft_API_mio():
                 else:
                     line2 = line
                 print(line1, '                 ', line2)
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0)
 
 
 
@@ -288,11 +288,11 @@ class Minecraft_API_mio():
     async def control_loop(self):
 
         await asyncio.gather(
-            # self.run(),
-            self.get_data_one_band(),
+            self.run(),
+            #self.get_data_one_band(),
             # self.get_data_two_band(),
 
-            # self.get_test_data(),
+            self.get_test_data(),
             # self.controller_minecraft_one_band_v1(),
             # self.controller_minecraft_one_band_v2(),
             # self.controller_mouse(),
