@@ -23,7 +23,7 @@
       "id": "2",
       "enabled": true,
       "arm": "left",
-      "mode": "hotkeys",
+      "mode": "mouse",
       "bindings": {
         "tilt_forward": "w",
         "tilt_backward": "s",

@@ -35,7 +35,7 @@ class Mio_API(QRunnable):
                                         'ctrl': Key.ctrl, 'space': Key.space}
         self.button_mouse_headers = {'left_click': Button.left, 'right_click': Button.right}
         self.ser = serial.Serial()
-        self.ser.port = '/dev/cu.usbmodem626AEF5E12351'
+        self.ser.port = 'COM3'
         self.ser.baudrate = 115200
         self.ser.timeout = 2
         self.is_open = False
@@ -91,10 +91,8 @@ class Mio_API(QRunnable):
         self.duration = 1/min_speed
 
     def keyboard_button_check_click(self):#TODO redesign
-
         if self.pre_button_states != self.button_states:
             print(self.pre_button_states)
-
             for e in self.pre_button_states:
                 if self.pre_button_states[e] != self.button_states[e]:
                     if self.button_states[e]:
@@ -162,7 +160,7 @@ class Mio_API(QRunnable):
                     s = i_list[4]
                     band_id = str(i_list[5])
                     self.json_data_with_config[band_id] = {'x': -y, 'y': x, 's': s}
-                    # print(self.json_data_with_config)
+                    print(self.json_data_with_config)
                 except:
                     pass
                 await asyncio.sleep(self.sleep_time)
@@ -273,8 +271,8 @@ class Mio_API(QRunnable):
             self.check_config(),
             self.check_button_now(),
             self.get_data_with_config(),
-            # self.controller_left_band_with_config(),
-            self.controller_right_band_with_config(),
+            self.controller_left_band_with_config(),
+            # self.controller_right_band_with_config(),
             self.open_serial()
 
         )
@@ -284,5 +282,3 @@ if __name__ == '__main__':
     mapi = Mio_API()
     mapi.init_json()
     asyncio.run(mapi.main_loop())
-
-
